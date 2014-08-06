@@ -422,7 +422,6 @@ class ComponentClass_test(unittest.TestCase):
         from nineml.abstraction_layer import ComponentClass
         from nineml.abstraction_layer import NamespaceAddress
         from nineml.exceptions import NineMLRuntimeError
-
         d = ComponentClass(name='D')
         e = ComponentClass(name='E')
         f = ComponentClass(name='F')
