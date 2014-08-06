@@ -1,0 +1,17 @@
+*.pyc
+.svn
+.externalToolBuilders
+.settings
+.texlipse
+*~
+*.swp
+.DS_Store
+/.project
+/.pydevproject
+*.tex
+lib9ml/python/nineml/examples/UL/nested_example.xml
+*.aux
+*.log
+*.out
+*.pdf
+*.synctex.gz
