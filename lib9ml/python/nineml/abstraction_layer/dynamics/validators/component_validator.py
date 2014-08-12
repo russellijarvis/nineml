@@ -14,7 +14,7 @@ from cv_namingconflicts import ComponentValidatorLocalNameConflicts
 from cv_general import ComponentValidatorTimeDerivativesAreDeclared
 from cv_general import ComponentValidatorNoDuplicatedObjects
 # from cv_general import ComponentValidatorAliasesAndStateVariablesHaveNoUnResolvedSymbols
-from cv_general import ComponentValidatorAssignmentsAliasesAndStateVariablesHaveNoUnResolvedSymbols  # @IgnorePep8
+from cv_general import ComponentValidatorAssignmentsAliasesAnalogOutsAndStateVariablesHaveNoUnResolvedSymbols  # @IgnorePep8
 from cv_general import ComponentValidatorPortConnections
 from cv_general import ComponentValidatorStateAssignmentsAreOnStateVariables
 from cv_general import ComponentValidatorAliasesAreNotRecursive
@@ -53,7 +53,7 @@ class ComponentValidator(object):
         ComponentValidatorTimeDerivativesAreDeclared(component)
         ComponentValidatorStateAssignmentsAreOnStateVariables(component)
         ComponentValidatorAliasesAreNotRecursive(component)
-        ComponentValidatorAssignmentsAliasesAndStateVariablesHaveNoUnResolvedSymbols(component)  # @IgnorePep8
+        ComponentValidatorAssignmentsAliasesAnalogOutsAndStateVariablesHaveNoUnResolvedSymbols(component)  # @IgnorePep8
         ComponentValidatorPortConnections(component)
         ComponentValidatorRegimeGraph(component)
         ComponentValidatorRegimeOnlyHasOneHandlerPerEvent(component)

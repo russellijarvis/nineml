@@ -320,6 +320,11 @@ class InterfaceInferer(ActionVisitor):
         for atom in assignment.rhs_atoms:
             self._notify_atom(atom)
 
+    # Atoms (possible parameters):
+    def action_analogout(self, analog_outs, **kwargs):  # @UnusedVariable
+        for atom in analog_outs.rhs_atoms:
+            self._notify_atom(atom)
+
     def action_alias(self, alias, **kwargs):  # @UnusedVariable
         for atom in alias.rhs_atoms:
             self._notify_atom(atom)

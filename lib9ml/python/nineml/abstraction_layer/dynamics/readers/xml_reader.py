@@ -10,6 +10,7 @@ import os
 from urllib2 import urlopen
 from lxml import etree
 
+import nineml
 from nineml.utility import expect_single, filter_expect_single
 from nineml.abstraction_layer.xmlns import NINEML, nineml_namespace
 from nineml.abstraction_layer.components import Parameter
@@ -82,16 +83,17 @@ class XMLLoader(object):
         subnodes = self.loadBlocks(element, blocks=subblocks)
 
         return al.Dynamics(regimes=subnodes["Regime"],
-                                  aliases=subnodes["Alias"],
-                                  state_variables=subnodes["StateVariable"])
+                           aliases=subnodes["Alias"],
+                           state_variables=subnodes["StateVariable"])
 
     def load_regime(self, element):
-        subblocks = ('TimeDerivative', 'OnCondition', 'OnEvent')
+        subblocks = ('TimeDerivative', 'OnCondition', 'OnEvent', 'AnalogOut')
         subnodes = self.loadBlocks(element, blocks=subblocks)
         transitions = subnodes["OnEvent"] + subnodes['OnCondition']
         return al.Regime(name=element.get('name'),
-                                time_derivatives=subnodes["TimeDerivative"],
-                                transitions=transitions)
+                         time_derivatives=subnodes["TimeDerivative"],
+                         transitions=transitions,
+                         analog_outs=subnodes["AnalogOut"])
 
     def load_statevariable(self, element):
         name = element.get("name")
@@ -144,6 +146,11 @@ class XMLLoader(object):
         port_name = element.get('port')
         return al.OutputEvent(port_name=port_name)
 
+    def load_analogout(self, element):
+        port_name = element.get('port')
+        rhs = self.load_single_internal_maths_block(element)
+        return al.AnalogOut(port_name=port_name, rhs=rhs)
+
     def load_single_internal_maths_block(self, element, checkOnlyBlock=True):
         if checkOnlyBlock:
             elements = list(element.iterchildren(tag=etree.Element))
@@ -194,6 +201,7 @@ class XMLLoader(object):
         "StateAssignment": load_stateassignment,
         "EventOut": load_eventout,
         #"EventIn": load_eventin,
+        "AnalogOut": load_analogout,
         "Subnode": load_subnode,
         "ConnectPorts": load_connectports,
     }

@@ -57,3 +57,6 @@ class ComponentValidatorTypes(ActionVisitor):
 
     def action_onevent(self, on_event, **kwargs):  # @UnusedVariable
         assert isinstance(on_event, al.OnEvent)
+
+    def action_analogout(self, analog_out, **kwargs):  # @UnusedVariable
+        assert isinstance(analog_out, al.AnalogOut)

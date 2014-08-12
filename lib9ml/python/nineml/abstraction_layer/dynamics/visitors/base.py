@@ -44,7 +44,7 @@ class ActionVisitor(ComponentVisitor):
     def visit_regime(self, regime, **kwargs):
         self.action_regime(regime, **kwargs)
         nodes = chain(regime.time_derivatives, regime.on_events,
-                      regime.on_conditions)
+                      regime.on_conditions, regime.analog_outs)
         for p in nodes:
             p.accept_visitor(self, **kwargs)
 
@@ -75,6 +75,9 @@ class ActionVisitor(ComponentVisitor):
 
     def visit_timederivative(self, time_derivative, **kwargs):
         self.action_timederivative(time_derivative, **kwargs)
+
+    def visit_analogout(self, analogout, **kwargs):
+        self.action_analogout(analogout, **kwargs)
 
     def visit_condition(self, condition, **kwargs):
         self.action_condition(condition, **kwargs)
@@ -142,4 +145,7 @@ class ActionVisitor(ComponentVisitor):
         self.check_pass()
 
     def action_onevent(self, on_event, **kwargs):  # @UnusedVariable
+        self.check_pass()
+
+    def action_analogout(self, analog_out, **kwargs):  # @UnusedVariable
         self.check_pass()

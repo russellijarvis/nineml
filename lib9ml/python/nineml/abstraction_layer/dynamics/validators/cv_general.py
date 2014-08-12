@@ -113,7 +113,7 @@ class ComponentValidatorAliasesAreNotRecursive(ComponentValidatorPerNamespace):
                 raise NineMLRuntimeError(errmsg)
 
 
-class ComponentValidatorAssignmentsAliasesAndStateVariablesHaveNoUnResolvedSymbols(ComponentValidatorPerNamespace):  # @IgnorePep8
+class ComponentValidatorAssignmentsAliasesAnalogOutsAndStateVariablesHaveNoUnResolvedSymbols(ComponentValidatorPerNamespace):  # @IgnorePep8
     """
     Check that aliases and timederivatives are defined in terms of other
     parameters, aliases, statevariables and ports
@@ -157,6 +157,16 @@ class ComponentValidatorAssignmentsAliasesAndStateVariablesHaveNoUnResolvedSymbo
         for ns, state_assignments in self.state_assignments.iteritems():
             for state_assignment in state_assignments:
                 for rhs_atom in state_assignment.rhs_atoms:
+                    if (not rhs_atom in self.available_symbols[ns] and
+                        not rhs_atom in excludes):
+                        err = ('Unresolved Symbol in Assignment: %s [%s]' %
+                               (rhs_atom, state_assignment))
+                        raise NineMLRuntimeError(err)
+
+        # Check AnalogOuts
+        for ns, analog_outs in self.analog_outs.iteritems():
+            for analog_out in analog_outs:
+                for rhs_atom in analog_out.rhs_atoms:
                     if (not rhs_atom in self.available_symbols[ns] and
                         not rhs_atom in excludes):
                         err = ('Unresolved Symbol in Assignment: %s [%s]' %
@@ -360,6 +370,9 @@ class ComponentValidatorNoDuplicatedObjects(ComponentValidatorPerNamespace):
 
     def action_onevent(self, on_event, **kwargs):  # @UnusedVariable
         self.all_objects.append(on_event)
+
+    def action_analogout(self, analog_out, **kwargs):  # @UnusedVariable
+        self.all_objects.append(analog_out)
 
 
 class ComponentValidatorRegimeOnlyHasOneHandlerPerEvent(

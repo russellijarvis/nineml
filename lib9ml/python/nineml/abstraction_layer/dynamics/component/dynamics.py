@@ -278,13 +278,15 @@ class Regime(object):
 
 
         """
-        valid_kwargs = ('name', 'transitions', 'time_derivatives')
+        valid_kwargs = ('name', 'transitions', 'time_derivatives',
+                        'analog_outs')
         for arg in kwargs:
             if not arg in valid_kwargs:
                 err = 'Unexpected Arg: %s' % arg
                 raise NineMLRuntimeError(err)
 
         transitions = kwargs.get('transitions', None)
+        analog_outs = kwargs.get('analog_outs', None)
         name = kwargs.get('name', None)
         kw_tds = normalise_parameter_as_list(kwargs.get('time_derivatives',
                                                         None))
@@ -321,6 +323,9 @@ class Regime(object):
             self.add_on_event(event)
         for condition in f_dict[OnCondition]:
             self.add_on_condition(condition)
+
+        # Stores connections to the analog out ports
+        self._analog_outs = normalise_parameter_as_list(analog_outs)
 
     def _resolve_references_on_transition(self, transition):
         if transition.target_regime_name is None:
@@ -403,6 +408,10 @@ class Regime(object):
         """Returns all the transitions out of this regime trigger by
         conditions"""
         return iter(self._on_conditions)
+
+    @property
+    def analog_outs(self):
+        return iter(self._analog_outs)
 
     @property
     def name(self):

@@ -12,6 +12,7 @@ import itertools
 from nineml.exceptions import NineMLRuntimeError
 from nineml.maths import (MathUtil, str_to_npfunc_map, func_namespace_split,
                           is_valid_lhs_target)
+from nineml.utility import ensure_valid_c_variable_name
 from . import parse
 
 
@@ -98,7 +99,6 @@ class Expression(object):
                 atoms.add(func)
         return atoms
 
-
     #@property
     # def rhs_missing_functions(self):
     #    """ yield names of functions in the RHS which are not in the math
@@ -120,6 +120,8 @@ class Expression(object):
     #            raise NineMLRuntimeError('Unexpected Missing Function: %s'%func)
     #            return True
     #    return False
+
+
 # TO GO:
 class Equation(Expression):
 
@@ -279,6 +281,40 @@ class StateAssignment(ExpressionWithSimpleLHS, RegimeElement):
 
     def __repr__(self):
         return "StateAssignment('%s', '%s')" % (self.lhs, self.rhs)
+
+
+class AnalogOut(Expression, RegimeElement):
+
+    """AnalogOut
+
+    AnalogOut provides an output stream of data from the component.
+    """
+
+    def accept_visitor(self, visitor, **kwargs):
+        """ |VISITATION| """
+        return visitor.visit_analogout(self, **kwargs)
+
+    def __init__(self, port_name, rhs):
+        """OutputAnalog Constructor
+
+        :param port: The name of the output EventPort that should
+            transmit an event. An `EventPort` with a mode of 'send' must exist
+            with a corresponding name in the component, otherwise a
+            ``NineMLRuntimeException`` will be raised.
+        :param rhs: A `string`, representing the value to return
+        """
+        RegimeElement.__init__(self)
+        Expression.__init__(self, rhs)
+        self._port_name = port_name.strip()
+        ensure_valid_c_variable_name(self._port_name)
+
+    @property
+    def port_name(self):
+        '''Returns the name of the port'''
+        return self._port_name
+
+    def __str__(self):
+        return "Analog Output ( port: %s, '%s' )" % (self.port_name, self.rhs)
 
 
 class ODE(ExpressionWithLHS, RegimeElement):
