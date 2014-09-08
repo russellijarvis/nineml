@@ -59,6 +59,15 @@ class Expression(object):
         elif isinstance(rhs, pq.Quantity):
             self._rhs_names = []
             self._rhs_funcs = []
+        elif isinstance(rhs, list):
+            rhs_names = set()
+            rhs_funcs = set()
+            for expr, _ in rhs:
+                n, f = self._parse_rhs(expr)
+                rhs_names.update(n)
+                rhs_funcs.update(f)
+            self._rhs_names = list(rhs_names)
+            self._rhs_funcs = list(rhs_funcs)
         else:
             raise NotImplementedError
 
