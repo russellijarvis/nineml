@@ -8,7 +8,6 @@ This file defines mathematical classes and derived classes
 import re
 import itertools
 import quantities as pq
-
 # import math_namespace
 from nineml.exceptions import NineMLRuntimeError
 from nineml.maths import (MathUtil, str_to_npfunc_map, func_namespace_split,
