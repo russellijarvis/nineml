@@ -90,8 +90,8 @@ class XMLWriter(ComponentVisitor):
             pieces = []
             for stmt, test in alias.rhs:
                 if test != 'otherwise':
-                    test = test.replace('>=', '&gt;')
-                    test = test.replace('<=', '&lt;')
+                    test = test.replace('>', '&gt;')
+                    test = test.replace('<', '&lt;')
                     piece = E('Piece',
                               E('MathInline', stmt),
                               E('MathInline', test))

@@ -48,9 +48,8 @@ class Expression(object):
     # If we assign to rhs, then we need to update the
     # cached names and funcs:
     def _set_rhs(self, rhs):
-        rhs = rhs.strip()
-        self._rhs = rhs
         if isinstance(rhs, str):
+            rhs = rhs.strip()
             self._rhs_names, self._rhs_funcs = self._parse_rhs(rhs)
             for name in self._rhs_names:
                 assert not name in self._rhs_funcs
@@ -59,17 +58,18 @@ class Expression(object):
         elif isinstance(rhs, pq.Quantity):
             self._rhs_names = []
             self._rhs_funcs = []
-        elif isinstance(rhs, list):
+        elif isinstance(rhs, list) or isinstance(rhs, tuple):
             rhs_names = set()
             rhs_funcs = set()
             for expr, _ in rhs:
-                n, f = self._parse_rhs(expr)
+                n, f = self._parse_rhs(expr.strip())
                 rhs_names.update(n)
                 rhs_funcs.update(f)
             self._rhs_names = list(rhs_names)
             self._rhs_funcs = list(rhs_funcs)
         else:
             raise NotImplementedError
+        self._rhs = rhs
 
     def _get_rhs(self):
         return self._rhs
