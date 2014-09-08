@@ -311,17 +311,22 @@ class ODE(ExpressionWithLHS, RegimeElement):
 
     """
 
-    def __init__(self, dependent_variable, independent_variable, rhs):
+    def __init__(self, dependent_variable, independent_variable, rhs,
+                 initial=None):
         RegimeElement.__init__(self)
         ExpressionWithLHS.__init__(self, rhs)
+        self._initial = Expression(initial) if initial else None
 
         self._dependent_variable = dependent_variable
         self._independent_variable = independent_variable
+        self._initial_condition = initial
 
     def __repr__(self):
-        return "ODE(d%s/d%s = %s)" % (self.dependent_variable,
+        return "ODE(d%s/d%s = %s%s)" % (self.dependent_variable,
                                       self.independent_variable,
-                                      self.rhs)
+                                      self.rhs,
+                                      (', initial =' + self._initial_condition
+                                       if self.initial else ''))
 
     @property
     def lhs(self):
@@ -337,6 +342,11 @@ class ODE(ExpressionWithLHS, RegimeElement):
     def independent_variable(self):
         """Return the independent variable"""
         return self._independent_variable
+
+    @property
+    def initial_condition(self):
+        """Return the initial condition"""
+        return self._initial_condition
 
     def lhs_name_transform_inplace(self, name_map):
         """Replace atoms on the LHS with mapping in name_map """
@@ -359,7 +369,7 @@ class TimeDerivative(ODE):
 
     """
 
-    def __init__(self, dependent_variable, rhs):
+    def __init__(self, dependent_variable, rhs, initial=None):
         """Time Derivative Constructor
 
             :param dependent_variable: A `string` containing a single symbol,
