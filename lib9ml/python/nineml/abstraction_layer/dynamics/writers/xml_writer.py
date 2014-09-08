@@ -79,8 +79,25 @@ class XMLWriter(ComponentVisitor):
                  variable=assignment.lhs)
 
     def visit_alias(self, alias, **kwargs):  # @UnusedVariable
+        if isinstance(alias.rhs, str):
+            rhs = E("MathInline", alias.rhs)
+        elif isinstance(alias.rhs, list):
+            pieces = []
+            for stmt, test in alias.rhs:
+                if test != 'otherwise':
+                    test = test.replace('>=', '&gt;')
+                    test = test.replace('<=', '&lt;')
+                    piece = E('Piece',
+                              E('MathInline', stmt),
+                              E('MathInline', test))
+                else:
+                    piece = E('Otherwise', E('MathInline', stmt))
+                pieces.append(piece)
+            rhs = E('Piecewise', *pieces)
+        else:
+            assert False
         return E('Alias',
-                 E("MathInline", alias.rhs),
+                 rhs,
                  name=alias.lhs)
 
     def visit_timederivative(self, time_derivative, **kwargs):  # @UnusedVariable @IgnorePep8
