@@ -17,8 +17,7 @@ class Parameter(object):
     future, wrapping in into its own object may make the transition easier
     """
 
-    def __init__(self, name, dimension="", valid_range=None,
-                 default_value=None):
+    def __init__(self, name, dimension="", valid_range=None):
         """Parameter Constructor
 
         :param name:  The name of the parameter.
@@ -29,7 +28,6 @@ class Parameter(object):
         self._name = name
         self._dimension = dimension
         self._valid_range = valid_range  # TODO: This is not used currently
-        self._default_value = default_value  # TODO: This is not used currently
 
     @property
     def name(self):
@@ -40,6 +38,11 @@ class Parameter(object):
     def dimension(self):
         """Returns the dimensions of the parameter"""
         return self._dimension
+
+    @property
+    def valid_range(self):
+        """Returns the valid range of the parameter"""
+        return self._valid_range
 
     def __repr__(self):
         return "<Parameter: %r (%r)>" % (self.name, self.dimension)
