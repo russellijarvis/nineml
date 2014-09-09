@@ -58,9 +58,10 @@ class Expression(object):
             rhs_names = set()
             rhs_funcs = set()
             for expr, _ in rhs:
-                n, f = self._parse_rhs(expr.strip())
-                rhs_names.update(n)
-                rhs_funcs.update(f)
+                if isinstance(expr, str):
+                    n, f = self._parse_rhs(expr.strip())
+                    rhs_names.update(n)
+                    rhs_funcs.update(f)
             self._rhs_names = list(rhs_names)
             self._rhs_funcs = list(rhs_funcs)
         else:

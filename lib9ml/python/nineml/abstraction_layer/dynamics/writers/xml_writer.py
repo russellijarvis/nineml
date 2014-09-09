@@ -4,10 +4,10 @@ docstring needed
 :copyright: Copyright 2010-2013 by the Python lib9ML team, see AUTHORS.
 :license: BSD-3, see LICENSE for details.
 """
-
 from itertools import chain
 from lxml import etree
 from lxml.builder import E
+import quantities as pq
 from nineml.abstraction_layer.dynamics import flattening
 from nineml.abstraction_layer.xmlns import nineml_namespace
 from nineml.abstraction_layer.dynamics.component import ComponentClass
@@ -94,6 +94,9 @@ class XMLWriter(ComponentVisitor):
                     piece = E('Otherwise', E('MathInline', stmt))
                 pieces.append(piece)
             rhs = E('Piecewise', *pieces)
+        elif isinstance(alias.rhs, pq.Quantity):
+            rhs = E("Value", str(float(alias.rhs)),
+                    units=str(alias.rhs.units)[4:])
         else:
             assert False
         return E('Alias',
