@@ -552,14 +552,13 @@ class StateVariable(object):
         """ |VISITATION| """
         return visitor.visit_statevariable(self, **kwargs)
 
-    def __init__(self, name, dimension="", initial=None):
+    def __init__(self, name, dimension=""):
         """StateVariable Constructor
 
         :param name:  The name of the state variable.
         """
         self._name = name.strip()
         self._dimension = dimension
-        self._initial = initial
         ensure_valid_c_variable_name(self._name)
 
     @property
