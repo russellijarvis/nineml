@@ -57,6 +57,19 @@ class ConnectionType(BaseDynamicsComponent):
     pass
 
 
+#FIXME should be dynamics component but I don't want to use the initial
+#      values at the moment (or probably ever if we switch to SEDML)
+class IonDynamics(BaseComponent):
+
+    """
+    Component representing a model of a ion (and channel) dynamics
+    """
+    abstraction_layer_module = 'dynamics'
+
+    def check_initial_values(self):
+        pass
+
+
 def get_or_create_prototype(prototype_ref, components, groups):
     if prototype_ref in groups:
         return groups[prototype_ref]
