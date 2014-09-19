@@ -39,7 +39,11 @@ class Expression(object):
         # A temporary measure, this is until the parser is
         # generalised to handle conditionals
         # return parse.expr_parse(rhs)
-        return parse.expr(rhs)
+        if isinstance(rhs, str):
+            parsed = parse.expr(rhs)
+        elif not isinstance(rhs, pq.quantity):
+            raise NotImplementedError
+        return parsed
 
     # If we assign to rhs, then we need to update the
     # cached names and funcs:

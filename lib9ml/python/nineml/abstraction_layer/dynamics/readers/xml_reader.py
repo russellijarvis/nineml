@@ -9,9 +9,10 @@ This file defines classes for reading NineML files.
 import os
 from urllib2 import urlopen
 from lxml import etree
-
+import quantities as pq
+import nineml
 from nineml.utility import expect_single, filter_expect_single
-from nineml.abstraction_layer.xmlns import NINEML, nineml_namespace
+from nineml.abstraction_layer.xmlns import NINEML, MATHML, nineml_namespace
 from nineml.abstraction_layer.components import Parameter
 from nineml.abstraction_layer.dynamics import component as al
 
@@ -172,6 +173,10 @@ class XMLLoader(object):
 
     def load_mathml(self, mathml):
         raise NotImplementedError
+
+    def load_value(self, value):
+        return pq.Quantity(float(value.text),
+                           value.attrib.get('units', 'dimensionless'))
 
     def load_piecewise(self, piecewise):
         pieces = []

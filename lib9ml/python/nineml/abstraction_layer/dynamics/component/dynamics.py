@@ -409,6 +409,10 @@ class Regime(object):
         return self._name
 
 
+class ComponentDynamics(object):
+    pass
+
+
 # Forwarding Function:
 def On(trigger, do=None, to=None):
     if isinstance(do, (OutputEvent, basestring)):
@@ -496,7 +500,9 @@ class Dynamics(object):
         # Load the state variables as objects or strings:
         sv_types = (basestring, StateVariable)
         sv_td = filter_discrete_types(state_variables, sv_types)
-        sv_from_strings = [StateVariable(o) for o in sv_td[basestring]]
+        sv_from_strings = [StateVariable(o,
+                                        dimension=state_variables[o].dimension)
+                           for o in sv_td[basestring]]
         state_variables = sv_td[StateVariable] + sv_from_strings
 
         self._regimes = regimes
@@ -567,3 +573,8 @@ class StateVariable(object):
 
     def __repr__(self):
         return "<StateVariable: %s (%s)>" % (self.name, self.dimension)
+
+# class SubComponent(BaseDynamicsComponent):
+#     pass
+
+
