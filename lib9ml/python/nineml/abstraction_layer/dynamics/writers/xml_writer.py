@@ -89,27 +89,12 @@ class XMLWriter(ComponentVisitor):
         elif isinstance(alias.rhs, list):
             pieces = []
             for stmt, test in alias.rhs:
-                # FIXME: This should be either flattened to the top level
-                #        or handled recursively
-                if isinstance(stmt, list):
-                    subpieces = []
-                    for s, t in stmt:
-                        if t != 'otherwise':
-                            subpiece = E('Piece',
-                                      E('MathInline', s),
-                                      E('MathInline', t))
-                        else:
-                            subpiece = E('Otherwise', E('MathInline', s))
-                        subpieces.append(subpiece)
-                    E_stmt = E('Piecewise', *subpieces)
-                else:
-                    E_stmt = E('MathInline', stmt)
                 if test != 'otherwise':
                     piece = E('Piece',
-                              E_stmt,
+                              E('MathInline', stmt),
                               E('MathInline', test))
                 else:
-                    piece = E('Otherwise', E_stmt)
+                    piece = E('Otherwise', E('MathInline', stmt))
                 pieces.append(piece)
             rhs = E('Piecewise', *pieces)
         elif isinstance(alias.rhs, pq.Quantity):

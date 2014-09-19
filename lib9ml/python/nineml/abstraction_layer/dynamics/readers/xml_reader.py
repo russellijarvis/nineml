@@ -10,7 +10,6 @@ import os
 from urllib2 import urlopen
 from lxml import etree
 import quantities as pq
-
 import nineml
 from nineml.utility import expect_single, filter_expect_single
 from nineml.abstraction_layer.xmlns import NINEML, MATHML, nineml_namespace
@@ -158,7 +157,8 @@ class XMLLoader(object):
 
         assert (len(element.findall(MATHML + "MathML")) +
                 len(element.findall(NINEML + "MathInline")) +
-                len(element.findall(NINEML + "Value"))) == 1
+                len(element.findall(NINEML + "Value")) +
+                len(element.findall(NINEML + "Piecewise"))) == 1
 
         if element.findall(NINEML + "MathInline"):
             mblock = expect_single(element.findall(NINEML +
@@ -169,6 +169,9 @@ class XMLLoader(object):
         elif element.findall(NINEML + "Value"):
             mblock = self.load_value(expect_single(element.findall(NINEML +
                                                                    "Value")))
+        elif element.findall(NINEML + "Piecewise"):
+            mblock = self.load_piecewise(expect_single(element.findall(NINEML +
+                                                                 "Piecewise")))
         return mblock
 
     def load_mathml(self, mathml):
@@ -177,6 +180,18 @@ class XMLLoader(object):
     def load_value(self, value):
         return pq.Quantity(float(value.text),
                            value.attrib.get('units', 'dimensionless'))
+
+    def load_piecewise(self, piecewise):
+        pieces = []
+        for elem in piecewise.findall(NINEML + "Piece"):
+            pieces.append([e.text.strip() for e in elem.findall(NINEML +
+                                                                "MathInline")])
+        otherwise = piecewise.findall(NINEML + "Otherwise")
+        assert len(otherwise) < 2
+        if len(otherwise):
+            elem = expect_single(otherwise[0].findall(NINEML + "MathInline"))
+            pieces.append([elem.text.strip(), 'otherwise'])
+        return pieces
 
     # These blocks map directly in to classes:
     def loadBlocks(self, element, blocks=None, check_for_spurious_blocks=True):
