@@ -16,3 +16,4 @@ nineml_mechanisms
 *.project
 *.pydevproject
 *.settings
+/spec/*
