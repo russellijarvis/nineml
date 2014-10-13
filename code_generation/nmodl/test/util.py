@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 from nineml.abstraction_layer.dynamics.component_modifiers import ComponentModifier
 from nineml.abstraction_layer.dynamics.flattening import flatten
 from nineml2nmodl import write_nmodl, write_nmodldirect
+from nineline.cells.build import path_to_exec
 
 
 BUILD_DIR = "build/"
@@ -38,8 +39,9 @@ def compile_nmodl(dir_name):
     os.chdir(dir_name)
     print 'Compiling nmodl in', os.getcwd()
     stdout = open("stdout.txt", "wb")
+    nrnivmodlpath = path_to_exec('nrnivmodl')
     try:
-        check_call('nrnivmodl', stdout=stdout, stderr=STDOUT)
+        check_call(nrnivmodlpath, stdout=stdout, stderr=STDOUT)
     except CalledProcessError:
         stdout.close()
         stdout = open("stdout.txt", "rb")
