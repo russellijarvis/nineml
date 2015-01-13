@@ -1,6 +1,9 @@
 from itertools import chain
 from operator import itemgetter
-from .base import BaseULObject, NINEML, E
+from lxml import etree
+from .base import BaseULObject, resolve_reference, write_reference, Reference
+from ..base import NINEML, E, annotate_xml, read_annotations
+from ..context import Context, read as read_context
 from utility import check_tag
 from ..utility import expect_single
 
@@ -40,16 +43,20 @@ class Selection(BaseULObject):
     defining_attributes = ('name', 'operation')
 
     def __init__(self, name, operation):
+        super(Selection, self).__init__()
         self.name = name
         self.operation = operation
-        self._from_reference = False
 
-    def _to_xml(self):
+    @write_reference
+    @annotate_xml
+    def to_xml(self):
         return E(self.element_name,
                  self.operation.to_xml(),
                  name=self.name)
 
     @classmethod
+    @resolve_reference
+    @read_annotations
     def from_xml(cls, element, context):
         check_tag(element, cls)
         # The only supported op at this stage
@@ -57,6 +64,10 @@ class Selection(BaseULObject):
                                                                'Concatenate')),
                                   context)
         return cls(element.attrib['name'], op)
+
+    def evaluate(self):
+        assert isinstance(self.operation, Concatenate), "Only concatenation is currently supported"
+        return (item.user_layer_object for item in self.operation.items)
 
 
 class Concatenate(BaseULObject):
@@ -69,21 +80,32 @@ class Concatenate(BaseULObject):
     defining_attributes = ('items',)
 
     def __init__(self, *items):
+        super(Concatenate, self).__init__()
         self._items = items
 
     @property
     def items(self):
         return self._items
 
+    @write_reference
+    @annotate_xml
     def to_xml(self):
+        def item_to_xml(item):
+            if isinstance(item, Reference):
+                return item.to_xml()
+            else:
+                return E.Reference(item.name)
         return E(self.element_name,
-                 *[E.Item(item.to_xml(), index=str(i))
-                   for i, item in enumerate(self.items)])
+                 *[E.Item(item_to_xml(item), index=str(i))
+                  for i, item in enumerate(self.items)])
 
     @classmethod
+    @resolve_reference
+    @read_annotations
     def from_xml(cls, element, context):
         # Load references and indices from xml
-        items = ((e.attrib['index'], context.resolve_ref(e))
+        items = ((e.attrib['index'],
+                  Reference.from_xml(e.find(NINEML + 'Reference'), context))
                  for e in element.findall(NINEML + 'Item'))
         # Sort by 'index' attribute
         indices, items = zip(*sorted(items, key=itemgetter(0)))
@@ -100,18 +122,17 @@ class Concatenate(BaseULObject):
         return cls(*items)  # Strip off indices used to sort elements
 
 
-class Network(BaseULObject):
+class Network(object):
 
     """
-    Container for populations and projections between those populations. May be
-    used as the node cell within a population, allowing hierarchical
-    structures.
+    Container for populations and projections between those populations.
     """
-    element_name = "Network"
-    defining_attributes = ("name", "populations", "projections", "selections")
-    children = ("populations", "projections", "selections")
+    #element_name = "Network"
+    #defining_attributes = ("name", "populations", "projections", "selections")
+    #children = ("populations", "projections", "selections")
 
-    def __init__(self, name, populations={}, projections={}, selections={}):
+    def __init__(self, name="anonymous", populations={}, projections={}, selections={}):
+        super(Network, self).__init__()
         self.name = name
         self.populations = populations
         self.projections = projections
@@ -133,20 +154,20 @@ class Network(BaseULObject):
                 raise Exception("Networks may only contain Populations, "
                                 "Projections, or Selections")
 
-    def _resolve_population_references(self):
-        for prj in self.projections.values():
-            for name in ('source', 'target'):
-                if prj.references[name] in self.populations:
-                    obj = self.populations[prj.references[name]]
-                elif prj.references[name] in self.selections:
-                    obj = self.selections[prj.references[name]]
-                elif prj.references[name] == self.name:
-                    obj = self
-                else:
-                    raise Exception("Unable to resolve population/selection "
-                                    "reference ('%s') for %s of %s" %
-                                    (prj.references[name], name, prj))
-                setattr(prj, name, obj)
+    # def _resolve_population_references(self):
+    #     for prj in self.projections.values():
+    #         for name in ('source', 'target'):
+    #             if prj.references[name] in self.populations:
+    #                 obj = self.populations[prj.references[name]]
+    #             elif prj.references[name] in self.selections:
+    #                 obj = self.selections[prj.references[name]]
+    #             elif prj.references[name] == self.name:
+    #                 obj = self
+    #             else:
+    #                 raise Exception("Unable to resolve population/selection "
+    #                                 "reference ('%s') for %s of %s" %
+    #                                 (prj.references[name], name, prj))
+    #             setattr(prj, name, obj)
 
     def get_components(self):
         components = []
@@ -154,34 +175,55 @@ class Network(BaseULObject):
             components.extend(p.get_components())
         return components
 
-    def get_subnetworks(self):
-        return [p.cell for p in self.populations.values()
-                if isinstance(p.cell, Network)]
+    #@write_reference
+    #@annotate_xml
+    #def to_xml(self):
+    #    return E(self.element_name,
+    #             name=self.name,
+    #             *[p.to_xml() for p in chain(self.populations.values(),
+    #                                         self.selections.values(),
+    #                                         self.projections.values())])
 
-    def _to_xml(self):
-        return E(self.element_name,
-                 name=self.name,
-                 *[p.to_xml() for p in chain(self.populations.values(),
-                                             self.selections.values(),
-                                             self.projections.values())])
+    #@classmethod
+    #@resolve_reference
+    #@read_annotations
+    #def from_xml(cls, element, context):
+    #    check_tag(element, cls)
+    #    populations = []
+    #    for pop_elem in element.findall(NINEML + 'PopulationItem'):
+    #        pop = Population.from_xml(pop_elem, context)
+    #        populations[pop.name] = pop
+    #    projections = []
+    #    for proj_elem in element.findall(NINEML + 'ProjectionItem'):
+    #        proj = Projection.from_xml(proj_elem, context)
+    #        projections[proj.name] = proj
+    #    selections = []
+    #    for sel_elem in element.findall(NINEML + 'Selection'):
+    #        sel = Selection.from_xml(sel_elem, context)
+    #        selections[sel.name] = sel
+    #    network = cls(name=element.attrib["name"], populations=populations,
+    #                  projections=projections, selections=selections)
+    #    return network
+
+    def write(self, filename):
+        context = Context()
+        units = set()
+        for name, obj in chain(self.populations.items(), self.projections.items()):
+            context[name] = obj
+            for c in obj.get_components():
+                units = units.union(c.units)
+        for name, obj in self.selections.items():
+            context[name] = obj
+        for u in units:
+            context[u.dimension.name] = u.dimension
+            context[u.name] = u
+        context.write(filename)
 
     @classmethod
-    def from_xml(cls, element, context):
-        check_tag(element, cls)
-        populations = []
-        for pop_elem in element.findall(NINEML + 'PopulationItem'):
-            pop = context.resolve_ref(pop_elem, Population)
-            populations[pop.name] = pop
-        projections = []
-        for proj_elem in element.findall(NINEML + 'ProjectionItem'):
-            proj = context.resolve_ref(proj_elem, Projection)
-            projections[proj.name] = proj
-        selections = []
-        for sel_elem in element.findall(NINEML + 'SelectionItem'):
-            sel = context.resolve_ref(sel_elem, Selection)
-            selections[sel.name] = sel
-        network = cls(name=element.attrib["name"], populations=populations,
-                      projections=projections, selections=selections)
+    def read(cls, filename):
+        context = read_context(filename)
+        network = cls()
+        network.add(*context.network_structures)
         return network
 
 
@@ -207,6 +249,7 @@ from .projection import Projection
 #         """
 #         condition - instance of an Operator subclass
 #         """
+#         super(Property, self).__init__()
 #         assert isinstance(condition, Operator)
 #         self.name = name
 #         self.condition = condition
@@ -305,6 +348,7 @@ from .projection import Projection
 #         return "%s in %s" % tuple(qstr(op) for op in self.operands)
 #
 # class Operator(BaseULObject):
+#     super(Property, self).__init__()
 #     defining_attributes = ("operands",)
 #     children = ("operands",)
 #

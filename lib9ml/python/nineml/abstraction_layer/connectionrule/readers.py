@@ -5,7 +5,7 @@ from nineml.abstraction_layer.xmlns import NINEML
 from nineml.abstraction_layer.components import Parameter
 from nineml.abstraction_layer.dynamics.readers import XMLReader
 from .base import (ComponentClass, ConnectionGenerator,
-                   StandarLibraryConnectionRule)
+                   StandardLibraryConnectionRule)
 from ...utility import expect_none_or_single
 
 
@@ -42,11 +42,8 @@ class XMLLoader(object):
                          dimension=element.get('dimension'))
 
     def load_connectionrule(self, element):
-        stdlib = expect_none_or_single(element.findall(NINEML +
-                                                       'StandardLibrary'))
-        if stdlib is not None:
-            return StandarLibraryConnectionRule(element.text,
-                                                element.get('url'))
+        if 'standardLibrary' in element.attrib:
+            return StandardLibraryConnectionRule(element.get('standardLibrary'))
         else:
             for t in element.iterchildren(tag=etree.Element):
                 try:

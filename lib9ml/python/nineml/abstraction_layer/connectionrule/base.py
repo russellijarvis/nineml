@@ -62,12 +62,11 @@ class Mask(BaseALObject):
         self.targets = IntervalSet(targets, targetSkip)
 
 
-class StandarLibraryConnectionRule(BaseALObject):
+class StandardLibraryConnectionRule(BaseALObject):
 
-    defining_attributes = ('name', 'reference_url')
+    defining_attributes = ('reference_url',)
 
-    def __init__(self, name, reference_url):
-        self.name = name
+    def __init__(self, reference_url):
         self.reference_url = reference_url
 
 
