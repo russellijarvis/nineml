@@ -33,7 +33,8 @@ class Dynamics(BaseALObject):
 
     defining_attributes = ('_regimes', '_aliases', '_state_variables')
 
-    def __init__(self, regimes=None, aliases=None, state_variables=None):
+    def __init__(self, regimes=None, aliases=None, state_variables=None,
+                 constants=None):
         """Dynamics object constructor
 
            :param aliases: A list of aliases, which must be either |Alias|
@@ -69,6 +70,7 @@ class Dynamics(BaseALObject):
         self._regimes = dict((r.name, r) for r in regimes)
         self._aliases = dict((a.lhs, a) for a in aliases)
         self._state_variables = dict((s.name, s) for s in state_variables)
+        self._constants = dict((c.name, c) for c in constants)
 
     def accept_visitor(self, visitor, **kwargs):
         """ |VISITATION| """
@@ -251,7 +253,8 @@ class DynamicsClass(ComponentClass, _NamespaceMixin):
                  event_ports=[],
                  dynamics=None, subnodes=None,
                  portconnections=None, regimes=None,
-                 aliases=None, state_variables=None):
+                 aliases=None, state_variables=None,
+                 constants=None):
         """Constructs a DynamicsClass
 
         :param name: The name of the componentclass.
@@ -292,13 +295,14 @@ class DynamicsClass(ComponentClass, _NamespaceMixin):
         # We can specify in the componentclass, and they will get forwarded to
         # the dynamics class. We check that we do not specify half-and-half:
         if dynamics is not None:
-            if regimes or aliases or state_variables:
+            if regimes or aliases or state_variables or constants:
                 err = "Either specify a 'dynamics' parameter, or "
                 err += "state_variables /regimes/aliases, but not both!"
                 raise NineMLRuntimeError(err)
         else:
             dynamics = Dynamics(regimes=regimes, aliases=aliases,
-                                state_variables=state_variables)
+                                state_variables=state_variables,
+                                constants=constants)
         ComponentClass.__init__(self, name, parameters, main_block=dynamics)
         self._query = DynamicsQueryer(self)
 
