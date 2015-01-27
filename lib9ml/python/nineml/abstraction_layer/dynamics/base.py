@@ -121,6 +121,8 @@ class Dynamics(BaseALObject):
     @property
     def piecewises_map(self):
         return self._piecewises
+
+    @property
     def randomvariables(self):
         return self._randomvariables.itervalues()
 

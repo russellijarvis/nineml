@@ -82,6 +82,7 @@ class ComponentClass(BaseALObject, TopLevelObject):
     def constants_map(self):
         return self._main_block.constants_map
 
+    @property
     def piecewises(self):
         return self._main_block.piecewises
 
