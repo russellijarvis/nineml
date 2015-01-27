@@ -23,7 +23,8 @@ class DynamicsActionVisitor(ComponentActionVisitor):
     def visit_dynamics(self, dynamics, **kwargs):
         self.action_dynamics(dynamics, **kwargs)
         nodes = chain(dynamics.regimes, dynamics.aliases,
-                      dynamics.constants, dynamics.state_variables)
+                      dynamics.constants, dynamics.state_variables,
+                      dynamics.piecewises)
         for p in nodes:
             p.accept_visitor(self, **kwargs)
 

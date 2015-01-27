@@ -35,6 +35,10 @@ class ComponentQueryer(object):
         """Returns a map of names to |Parameter| objects"""
         return dict([(c.name, c) for c in self.componentclass.constants])
 
+    def piecewises_map(self):
+        """Returns a map of names to |Parameter| objects"""
+        return dict([(c.name, c) for c in self.componentclass.piecewises])
+
     # Used by the flattening code:
     def get_fully_qualified_port_connections(self):
         """Used by the flattening code.

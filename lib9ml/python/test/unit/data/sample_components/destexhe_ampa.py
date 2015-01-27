@@ -9,8 +9,7 @@ COMMENT
 -----------------------------------------------------------------------------
 
 	Simple model for glutamate AMPA receptors
-	=========================================
-
+	
   - FIRST-ORDER KINETICS, FIT TO WHOLE-CELL RECORDINGS
 
     Whole-cell recorded postsynaptic currents mediated by AMPA/Kainate

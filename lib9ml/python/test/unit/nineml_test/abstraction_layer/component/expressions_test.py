@@ -2,9 +2,13 @@
 import unittest
 from nineml.abstraction_layer import (Expression,
                                       Alias, StateAssignment, TimeDerivative)
-from nineml.abstraction_layer.expressions import ExpressionWithSimpleLHS, Constant
+
+from nineml.abstraction_layer.expressions import (ExpressionWithSimpleLHS,
+                                                  Constant,
+                                                  Piecewise, Piece, Otherwise,
+                                                  Condition)
 from nineml.exceptions import NineMLMathParseError
-from nineml.abstraction_layer.units import coulomb
+from nineml.abstraction_layer.units import coulomb, mV
 from nineml.abstraction_layer.componentclass.utils.xml import (
     ComponentClassXMLWriter as XMLWriter, ComponentClassXMLLoader as XMLLoader)
 from nineml import Document
@@ -311,3 +315,38 @@ class Constant_test(unittest.TestCase):
         loader = XMLLoader(Document(coulomb))
         c = loader.load_constant(xml)
         self.assertEqual(c, self.c, "Constant failed xml roundtrip")
+
+
+class Piecewise_test(unittest.TestCase):
+
+    def setUp(self):
+        self.pw = Piecewise(name="saturated_v", units=mV,
+                            pieces=[Piece('v ^ 2 + c', 'v < 10'),
+                                    Piece('-k * v ^ 2 + c', 'v < 0')],
+                            otherwise=Otherwise('100 + c'))
+
+    def test_accept_visitor(self):
+        # Signature: name(self, visitor, **kwargs)
+                # |VISITATION|
+
+        class PiecewiseTestVisitor(TestVisitor):
+
+            def visit_piecewise(self, component, **kwargs):  # @UnusedVariable @IgnorePep8
+                return kwargs
+
+        v = PiecewiseTestVisitor()
+        self.assertEqual(
+            v.visit(self.pw, kwarg1='Hello', kwarg2='Hello2'),
+            {'kwarg1': 'Hello', 'kwarg2': 'Hello2'}
+        )
+
+    def test_atoms(self):
+        self.assertEquals(sorted(self.pw.rhs_atoms), sorted(['c', 'k', 'v',
+                                                             'pow']))
+
+    def test_xml_roundtrip(self):
+        writer = XMLWriter()
+        xml = self.pw.accept_visitor(writer)
+        loader = XMLLoader(Document(mV))
+        pw = loader.load_piecewise(xml)
+        self.assertEqual(pw, self.pw, "Piecewise failed xml roundtrip")

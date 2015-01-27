@@ -30,3 +30,7 @@ class ComponentClassInterfaceInferer(ComponentActionVisitor):
 
     def action_constant(self, constant, **kwargs):  # @UnusedVariable
         self.declared_symbols.add(constant.name)
+
+    def action_piecewise(self, piecewise, **kwargs):  # @UnusedVariable
+        self.declared_symbols.add(piecewise.name)
+        self.atoms.update(piecewise.atoms)

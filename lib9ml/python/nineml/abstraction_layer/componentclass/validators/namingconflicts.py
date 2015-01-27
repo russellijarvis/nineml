@@ -44,6 +44,9 @@ class LocalNameConflictsComponentValidator(PerNamespaceComponentValidator):
     def action_constant(self, constant, namespace, **kwargs):  # @UnusedVariable @IgnorePep8
         self.check_conflicting_symbol(namespace=namespace,
                                       symbol=constant.name)
+    def action_piecewise(self, piecewise, namespace, **kwargs):  # @UnusedVariable @IgnorePep8
+        self.check_conflicting_symbol(namespace=namespace,
+                                      symbol=piecewise.name)
 
 
 class DimensionNameConflictsComponentValidator(PerNamespaceComponentValidator):
@@ -70,3 +73,6 @@ class DimensionNameConflictsComponentValidator(PerNamespaceComponentValidator):
 
     def action_constant(self, constant, **kwargs):  # @UnusedVariable @IgnorePep8
         self.check_conflicting_dimension(constant.units.dimension)
+
+    def action_piecewise(self, piecewise, **kwargs):  # @UnusedVariable @IgnorePep8
+        self.check_conflicting_dimension(piecewise.units.dimension)

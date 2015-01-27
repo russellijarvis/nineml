@@ -84,3 +84,5 @@ class ComponentEqualityChecker(object):
 
         # Check Constants:
         assert_equal_list(comp1.constants, comp2.constants)
+        # Check Piecewises:
+        assert_equal_list(comp1.piecewises, comp2.piecewises)

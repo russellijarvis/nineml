@@ -7,6 +7,7 @@ This module provides the base class for these.
 :copyright: Copyright 2010-2013 by the Python lib9ML team, see AUTHORS.
 :license: BSD-3, see LICENSE for details.
 """
+from itertools import chain
 from abc import ABCMeta
 from .. import BaseALObject
 import nineml
@@ -81,6 +82,13 @@ class ComponentClass(BaseALObject, TopLevelObject):
     def constants_map(self):
         return self._main_block.constants_map
 
+    def piecewises(self):
+        return self._main_block.piecewises
+
+    @property
+    def piecewises_map(self):
+        return self._main_block.piecewises_map
+
     @property
     def dimensions(self):
         return set(a.dimension for a in self.attributes_with_dimension)
@@ -91,7 +99,7 @@ class ComponentClass(BaseALObject, TopLevelObject):
 
     @property
     def attributes_with_units(self):
-        return self.constants
+        return chain(self.piecewises, self.constants)
 
     def standardize_unit_dimensions(self, reference_set=None):
         """
@@ -131,6 +139,7 @@ class Parameter(BaseALObject):
     future, wrapping in into its own object may make the transition easier
     """
 
+    element_name = 'Parameter'
     defining_attributes = ('name', 'dimension')
 
     def __init__(self, name, dimension=None):
