@@ -6,18 +6,18 @@ from nineml.abstraction_layer.distribution import DistributionClass
 import tempfile
 
 examples_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..',
-                            '..', '..', '..', 'catalog', 'randomdistributions')
+                            '..', '..', '..', 'catalog', 'distributions')
 
 
 class TestDistribution(unittest.TestCase):
 
     def test_load(self):
-        document = read(os.path.join(examples_dir, 'normal.xml'))
+        document = read(os.path.join(examples_dir, 'Normal.xml'))
         self.assertEquals(type(document['NormalDistribution']),
                           DistributionClass)
 
     def test_to_xml(self):
-        document = read(os.path.join(examples_dir, 'normal.xml'))
+        document = read(os.path.join(examples_dir, 'Normal.xml'))
         comp_class = document['NormalDistribution']
         xml = comp_class.to_xml()
         self.assertEquals(_Element, type(xml))
