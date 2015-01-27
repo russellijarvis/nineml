@@ -86,3 +86,5 @@ class ComponentEqualityChecker(object):
         assert_equal_list(comp1.constants, comp2.constants)
         # Check Piecewises:
         assert_equal_list(comp1.piecewises, comp2.piecewises)
+        # Check RandomVariables:
+        assert_equal_list(comp1.randomvariables, comp2.randomvariables)

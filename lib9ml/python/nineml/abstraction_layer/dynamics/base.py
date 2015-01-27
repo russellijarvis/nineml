@@ -34,7 +34,7 @@ class Dynamics(BaseALObject):
     defining_attributes = ('_regimes', '_aliases', '_state_variables')
 
     def __init__(self, regimes=None, aliases=None, state_variables=None,
-                 constants=None, piecewises=None):
+                 constants=None, piecewises=None, randomvariables=None):
         """Dynamics object constructor
 
            :param aliases: A list of aliases, which must be either |Alias|
@@ -52,6 +52,7 @@ class Dynamics(BaseALObject):
         state_variables = normalise_parameter_as_list(state_variables)
         constants = normalise_parameter_as_list(constants)
         piecewises = normalise_parameter_as_list(piecewises)
+        randomvariables = normalise_parameter_as_list(randomvariables)
 
         # Load the aliases as objects or strings:
         alias_td = filter_discrete_types(aliases, (basestring, Alias))
@@ -74,6 +75,7 @@ class Dynamics(BaseALObject):
         self._state_variables = dict((s.name, s) for s in state_variables)
         self._constants = dict((c.name, c) for c in constants)
         self._piecewises = dict((c.name, c) for c in piecewises)
+        self._randomvariables = dict((c.name, c) for c in randomvariables)
 
     def accept_visitor(self, visitor, **kwargs):
         """ |VISITATION| """
@@ -119,6 +121,12 @@ class Dynamics(BaseALObject):
     @property
     def piecewises_map(self):
         return self._piecewises
+    def randomvariables(self):
+        return self._randomvariables.itervalues()
+
+    @property
+    def randomvariables_map(self):
+        return self._randomvariables
 
     @property
     def state_variables(self):
@@ -273,7 +281,7 @@ class DynamicsClass(ComponentClass, _NamespaceMixin):
                  dynamics=None, subnodes=None,
                  portconnections=None, regimes=None,
                  aliases=None, state_variables=None,
-                 constants=None, piecewises=None):
+                 constants=None, piecewises=None, randomvariables=None):
         """Constructs a DynamicsClass
 
         :param name: The name of the componentclass.
@@ -315,7 +323,7 @@ class DynamicsClass(ComponentClass, _NamespaceMixin):
         # the dynamics class. We check that we do not specify half-and-half:
         if dynamics is not None:
             if (regimes or aliases or state_variables or constants or
-                    piecewises):
+                    piecewises or randomvariables):
                 err = "Either specify a 'dynamics' parameter, or "
                 err += "state_variables /regimes/aliases, but not both!"
                 raise NineMLRuntimeError(err)
@@ -323,7 +331,8 @@ class DynamicsClass(ComponentClass, _NamespaceMixin):
             dynamics = Dynamics(regimes=regimes, aliases=aliases,
                                 state_variables=state_variables,
                                 constants=constants,
-                                piecewises=piecewises)
+                                piecewises=piecewises,
+                                randomvariables=randomvariables)
         ComponentClass.__init__(self, name, parameters, main_block=dynamics)
         self._query = DynamicsQueryer(self)
 

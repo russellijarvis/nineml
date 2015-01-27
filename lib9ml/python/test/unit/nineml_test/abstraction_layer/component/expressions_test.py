@@ -4,11 +4,12 @@ from nineml.abstraction_layer import (Expression,
                                       Alias, StateAssignment, TimeDerivative)
 
 from nineml.abstraction_layer.expressions import (ExpressionWithSimpleLHS,
-                                                  Constant,
-                                                  Piecewise, Piece, Otherwise,
-                                                  Condition)
+                                                  Constant, Piecewise, Piece,
+                                                  Otherwise, Condition,
+                                                  RandomVariable,
+                                                  RandomDistribution)
 from nineml.exceptions import NineMLMathParseError
-from nineml.abstraction_layer.units import coulomb, mV
+from nineml.abstraction_layer.units import coulomb, mV, S_per_cm2
 from nineml.abstraction_layer.componentclass.utils.xml import (
     ComponentClassXMLWriter as XMLWriter, ComponentClassXMLLoader as XMLLoader)
 from nineml import Document
@@ -350,3 +351,34 @@ class Piecewise_test(unittest.TestCase):
         loader = XMLLoader(Document(mV))
         pw = loader.load_piecewise(xml)
         self.assertEqual(pw, self.pw, "Piecewise failed xml roundtrip")
+
+
+class RandomVariable_test(unittest.TestCase):
+
+    def setUp(self):
+        self.rv = RandomVariable(
+            name="synaptic_noise", units=S_per_cm2,
+            distribution=RandomDistribution(
+                'Normal', {'mean': 0.0, 'variance': 0.01}, validate=False))
+
+    def test_accept_visitor(self):
+        # Signature: name(self, visitor, **kwargs)
+                # |VISITATION|
+
+        class RandomVariableTestVisitor(TestVisitor):
+
+            def visit_randomvariable(self, component, **kwargs):  # @UnusedVariable @IgnorePep8
+                return kwargs
+
+        v = RandomVariableTestVisitor()
+        self.assertEqual(
+            v.visit(self.rv, kwarg1='Hello', kwarg2='Hello2'),
+            {'kwarg1': 'Hello', 'kwarg2': 'Hello2'}
+        )
+
+    def test_xml_roundtrip(self):
+        writer = XMLWriter()
+        xml = self.rv.accept_visitor(writer)
+        loader = XMLLoader(Document(S_per_cm2))
+        rv = loader.load_randomvariable(xml)
+        self.assertEqual(rv, self.rv, "Piecewise failed xml roundtrip")

@@ -11,7 +11,7 @@ from itertools import chain
 from nineml.xmlns import E
 from . import ComponentVisitor
 from ...expressions import (Alias, Constant, Piecewise, Piece, Condition,
-                            Otherwise)
+                            Otherwise, RandomVariable, RandomDistribution)
 from nineml.abstraction_layer.componentclass.base import Parameter
 from nineml.annotations import annotate_xml, read_annotations
 from nineml.utils import expect_single, filter_expect_single
@@ -49,6 +49,16 @@ class ComponentClassXMLLoader(object):
         name = element.get("name")
         rhs = self.load_single_internmaths_block(element)
         return Alias(lhs=name, rhs=rhs)
+
+    @read_annotations
+    def load_randomvariable(self, element):
+        # RandomDistributions are defined in Uncertml (http://uncertml.org)
+        # so have their own reader/writing functions.
+        return RandomVariable(
+            name=element.get('name'),
+            distribution=RandomDistribution.from_xml(
+                expect_single(element.getchildren()), self.document),
+            units=self.document[element.get('units')])
 
     @read_annotations
     def load_constant(self, element):
@@ -154,7 +164,8 @@ class ComponentClassXMLLoader(object):
         "Piecewise": load_piecewise,
         "Piece": load_piece,
         "Otherwise": load_otherwise,
-        "Condition": load_condition
+        "Condition": load_condition,
+        "RandomVariable": load_randomvariable
     }
 
 
@@ -202,6 +213,13 @@ class ComponentClassXMLWriter(ComponentVisitor):
         return E('Constant', str(constant.value),
                  name=constant.name,
                  units=constant.units.name)
+
+    @annotate_xml
+    def visit_randomvariable(self, randomvariable):
+        return E('RandomVariable',
+                 randomvariable.distribution.to_xml(),
+                 name=randomvariable.name,
+                 units=randomvariable.units.name)
 
 
 class ComponentClassXMLReader(object):

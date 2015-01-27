@@ -34,3 +34,6 @@ class ComponentClassInterfaceInferer(ComponentActionVisitor):
     def action_piecewise(self, piecewise, **kwargs):  # @UnusedVariable
         self.declared_symbols.add(piecewise.name)
         self.atoms.update(piecewise.atoms)
+
+    def action_randomvariable(self, randomvariable, **kwargs):  # @UnusedVariable @IgnorePep8
+        self.declared_symbols.add(randomvariable.name)

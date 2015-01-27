@@ -117,6 +117,8 @@ class NoUnresolvedSymbolsComponentValidator(PerNamespaceComponentValidator):
         self.add_symbol(namespace, constant.name)
     def action_piecewise(self, piecewise, namespace, **kwargs):  # @UnusedVariable @IgnorePep8
         self.add_symbol(namespace, piecewise.name)
+    def action_randomvariable(self, randomvariable, namespace, **kwargs):  # @UnusedVariable @IgnorePep8
+        self.add_symbol(namespace, randomvariable.name)
 
 
 class NoDuplicatedObjectsComponentValidator(PerNamespaceComponentValidator):
@@ -142,6 +144,9 @@ class NoDuplicatedObjectsComponentValidator(PerNamespaceComponentValidator):
 
     def action_piecewise(self, piecewise, **kwargs):  # @UnusedVariable
         self.all_objects.append(piecewise)
+
+    def action_randomvariable(self, randomvariable, **kwargs):  # @UnusedVariable
+        self.all_objects.append(randomvariable)
 
 
 class CheckNoLHSAssignmentsToMathsNamespaceComponentValidator(
@@ -176,3 +181,5 @@ class CheckNoLHSAssignmentsToMathsNamespaceComponentValidator(
 
     def action_piecewise(self, piecewise, **kwargs):  # @UnusedVariable
         self.check_lhssymbol_is_valid(piecewise.name)
+    def action_randomvariable(self, randomvariable, **kwargs):  # @UnusedVariable
+        self.check_lhssymbol_is_valid(randomvariable.name)

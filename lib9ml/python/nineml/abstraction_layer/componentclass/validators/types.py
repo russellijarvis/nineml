@@ -8,6 +8,7 @@ docstring needed
 from ..utils import ComponentActionVisitor
 from ..base import ComponentClass, Parameter
 from ...expressions import Alias, Constant, Piecewise
+from ...expressions import Alias, RandomVariable
 
 
 class TypesComponentValidator(ComponentActionVisitor):
@@ -31,3 +32,6 @@ class TypesComponentValidator(ComponentActionVisitor):
 
     def action_piecewise(self, piecewise, **kwargs):  # @UnusedVariable
         assert isinstance(piecewise, Piecewise)
+
+    def action_randomvariable(self, randomvariable, **kwargs):  # @UnusedVariable
+        assert isinstance(randomvariable, RandomVariable)
